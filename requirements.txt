@@ -1,0 +1,9 @@
+apache-airflow==2.6.3
+psycopg2-binary==2.9.9
+apache-airflow-providers-postgres==5.7.1
+confluent-kafka==2.2.0
+apache-airflow-providers-apache-kafka==1.2.0
+sqlalchemy==1.4.49
+pendulum==2.1.2
+flask-session==0.4.0
+connexion==2.14.2

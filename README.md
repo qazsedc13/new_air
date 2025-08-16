@@ -1,6 +1,3 @@
-Вот полный ответ в формате Markdown, который вы можете скопировать и использовать как `README.md` для вашего репозитория:
-
----
 
 # Apache Airflow + Kafka + PostgreSQL (Docker)
 

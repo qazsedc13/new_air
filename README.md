@@ -1,110 +1,50 @@
+# New Airflow & Kafka Environment
 
-# Apache Airflow + Kafka + PostgreSQL (Docker)
+Современная среда для разработки конвейеров данных с интеграцией Apache Airflow и стека Apache Kafka.
 
-Данный проект предоставляет готовую инфраструктуру в виде Docker-контейнеров для запуска Apache Airflow с поддержкой Apache Kafka и PostgreSQL.
+## Описание
+Данный проект предоставляет полнофункциональное окружение для работы с потоковыми данными. Включает в себя Apache Airflow для оркестрации, брокер сообщений Kafka с Zookeeper и удобный графический интерфейс Kafka UI. Проект содержит примеры DAG для генерации реалистичных синтетических данных (с помощью библиотеки Faker) и их передачи в Kafka в формате JSON.
 
-## 📁 Структура проекта
+## Технологический стек
+- **Оркестрация:** Apache Airflow 2.x
+- **Стриминг данных:** Apache Kafka (Confluent Platform 7.2.1), Zookeeper
+- **Мониторинг Kafka:** Kafka UI
+- **База данных:** PostgreSQL 13.8 (метаданные Airflow)
+- **Язык программирования:** Python 3.x
+- **Контейнеризация:** Docker, Docker Compose
+- **Библиотеки Python:** `confluent-kafka`, `faker`, `psycopg2-binary`
 
-```
-new_air/
-├── scripts/
-│   └── init_connections.py     # Создание подключений в Airflow при инициализации
-├── docker-compose.yml          # Описание сервисов Docker
-├── Dockerfile                  # Сборка образа Airflow
-├── entrypoint.sh               # Скрипт инициализации и запуска Airflow
-├── requirements.txt            # Список Python-зависимостей
-└── README.md                   # Текущий файл документации
-```
+## Установка и запуск
 
-## ⚙️ Компоненты
+1. Убедитесь, что у вас установлены **Docker** и **Docker Compose**.
+2. Склонируйте репозиторий:
+   ```bash
+   git clone git@github.com:qazsedc13/new_air.git
+   ```
+   И перейдите в папку проекта.
+3. Запустите все сервисы:
+   ```bash
+   docker-compose up --build -d
+   ```
+4. Доступ к интерфейсам:
+   - **Airflow Webserver:** [http://localhost:8080](http://localhost:8080) (логин/пароль: `admin`/`admin`)
+   - **Kafka UI:** [http://localhost:8082](http://localhost:8082) (просмотр топиков и сообщений)
 
-Проект включает следующие контейнеризованные сервисы:
+## Примеры использования
+- **Генерация данных:** DAG `job_kafka_produce_json` создает случайные события пользователей (имена, ID, уровни квалификации) и отправляет их в Kafka.
+- **Чтение данных:** DAG-файлы `job_kafka_read_json4.py` и `job_kafka_read_json5.py` демонстрируют различные подходы к потреблению и обработке JSON-сообщений из топиков.
+- **Настройка подключений:** Скрипт `scripts/init_connections.py` позволяет автоматизировать создание необходимых Connection в Airflow для взаимодействия с Kafka.
 
-| Сервис        | Назначение |
-|---------------|------------|
-| **Apache Airflow** | Платформа для оркестрации ETL-процессов. Web UI доступен на порту 8080 |
-| **PostgreSQL**     | Реляционная БД для хранения метаданных Airflow и пользовательских данных |
-| **Kafka**          | Распределённая система потоковой обработки сообщений |
-| **ZooKeeper**      | Необходим для работы Kafka — управление кластером |
-| **Kafka UI**       | Веб-интерфейс управления Kafka, доступен на порту 8081 |
+## Структура проекта
+- `dags/` — директория с исходным кодом DAG-файлов.
+- `scripts/` — вспомогательные скрипты для настройки окружения.
+- `docker-compose.yml` — конфигурация всей инфраструктуры (7 сервисов).
+- `Dockerfile` — кастомный образ Airflow с предустановленными зависимостями.
+- `init.sql` — SQL-скрипт для инициализации БД при первом запуске.
+- `requirements.txt` — список необходимых Python-пакетов.
+- `entrypoint.sh` — сценарий запуска контейнера Airflow.
 
-## 🔧 Подключения в Airflow
-
-Создаются автоматически при первом запуске:
-
-| ID подключения     | Тип подключения | Цель использования |
-|--------------------|------------------|---------------------|
-| `kafka_synapce`    | Kafka            | Подключение к брокеру Kafka |
-| `kap_247_db`       | PostgreSQL       | Подключение к БД PostgreSQL |
-
-Пример конфигурации:
-```python
-{
-    "conn_id": "kafka_synapce",
-    "conn_type": "kafka", 
-    "extra": '{"bootstrap.servers": "kafka:9092"}'
-}
-{
-    "conn_id": "kap_247_db",
-    "conn_type": "postgres",
-    "host": "postgres",
-    "port": 5432,
-    "login": "data_user",
-    "password": "data_password",
-    "schema": "kap_247_db"
-}
-```
-
-## 🐳 Запуск проекта
-
-1. Убедитесь, что у вас установлен [Docker](https://docs.docker.com/engine/install/) и [Docker Compose](https://docs.docker.com/compose/install/).
-2. Клонируйте репозиторий:
-```bash
-git clone https://github.com/ваше-имя-репо/new_air.git
-cd new_air
-```
-3. Соберите и запустите контейнеры:
-```bash
-docker-compose up -d --build
-```
-
-## 🌐 Доступные сервисы
-
-| Сервис             | URL                            | Логин / Пароль         |
-|--------------------|--------------------------------|------------------------|
-| Airflow Web UI     | http://localhost:8080          | `admin` / `admin`      |
-| Kafka UI           | http://localhost:8081          | Без авторизации        |
-| PostgreSQL         | Хост: `postgres:5432`          | `data_user:data_password` |
-| Kafka Brokers      | `kafka:9092`                   |                        |
-
-## 🛠️ Дополнительные действия
-
-### 🔄 Пересоздать метаданные Airflow
-
-Если нужно пересоздать БД Airflow, удалите том с данными:
-```bash
-docker-compose down -v
-docker-compose up -d --build
-```
-
-### 📦 Обновление зависимостей
-
-Чтобы добавить или обновить зависимости, измените `requirements.txt`, затем выполните:
-```bash
-docker-compose build airflow
-```
-
-## ✅ Технологии
-
-- [Apache Airflow](https://airflow.apache.org/)
-- [Kafka](https://kafka.apache.org/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Docker & Docker Compose](https://www.docker.com/)
-
-## 📝 Лицензия
-
-MIT License — см. файл [LICENSE](LICENSE) для получения подробной информации.
-
---- 
-
-Вы можете дополнить этот README информацией о ваших DAG-ах, если они будут храниться в этом же репозитории.
+## Зависимости и требования
+- Docker Engine 20.10.0+
+- Минимум 4 ГБ (рекомендуется 8 ГБ) оперативной памяти для запуска всего стека.
+- Порты 8080, 8082, 29092, 5432 должны быть свободны.
